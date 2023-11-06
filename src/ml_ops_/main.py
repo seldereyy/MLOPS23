@@ -106,8 +106,10 @@ def model_predict(filename: str, TestPool: TestData):
     Получаем предсказания модели в виде листа 
     """
     path = os.path.join(config["path_to_models"], filename)
+    if filename[-4:]!='.pkl':
+        filename+='.pkl'
     if not os.path.exists(path):
-        raise raise_except(MyAppException, "Такая модель не была обучена", 404)
+        return f"Такая модель не была обучена, {path}"
     model = pickle_load(path)
 
     return model.predict(TestPool.X_test).tolist()
