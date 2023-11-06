@@ -1,12 +1,12 @@
 Чтобы запустить сервер, введите
 `poetry run start`
 После этого доступен swagger по:
-http://127.0.0.1:5049/docs#/default/train_model_train_model_post
+http://127.0.0.1:5049/docs
 
 Немного косякнула с poetry. Весь проект живет в директории src. 
 В папке src две ключевые папки:
 * `ml_ops_1` - root папка проекта. В ней лежит main и utils, конфиг для инициализации папки хранения моделей и названия типов моделей
-* `models` - обертки на 2 модели: LogisticRegression sklearn и XGBClassifier от xgboost. Над ними класс BasicWrapper, инцииализирующий основные методы и абстрактные, различные для моделей
+* `models` - обертки на 2 модели: LogisticRegression sklearn и XGBClassifier реализации xgboost. Над ними класс BasicWrapper, инцииализирующий основные методы и абстрактные, различные для моделей
 
 В папке tests:
 * test_data - пример данных, на которых тестила работу сервера (базово sklearn make_blobs на 3 класса и разделение на train test)
