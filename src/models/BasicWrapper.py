@@ -1,13 +1,10 @@
 import os
-import pickle
-import sys
 from abc import ABCMeta, abstractmethod
 
-sys.path.append("/Users/user/HSE/ml_ops/src/ml_ops_1/")
 import numpy as np
-from utils import load_yaml
+from src.pickle_utils import load_yaml, pickle_dump
 
-config = load_yaml("/Users/user/HSE/ml_ops/src/ml_ops_1/cnf.yml")
+config = load_yaml("src/cnf.yml")
 path_to_models = config["path_to_models"]
 
 
@@ -37,9 +34,7 @@ class WrapModel(metaclass=ABCMeta):
 
     def dump(self, filename):
         """ Dump model """
-        if filename[-4:] != ".pkl":
-            filename += ".pkl"
-        os.makedirs(path_to_models, exist_ok=True)
 
-        with open(os.path.join(path_to_models, filename), "wb") as f:
-            pickle.dump(self.model_, f)
+        os.makedirs(path_to_models, exist_ok=True)
+        path=os.path.join(path_to_models, filename)
+        pickle_dump(self.model_, path)

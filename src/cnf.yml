@@ -1,2 +1,2 @@
-path_to_models: "/Users/user/HSE/ml_ops/models_data/"
+path_to_models: "./models_data/"
 available_models: ['MyLogisticRegression', 'MyXGBoost']
