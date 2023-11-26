@@ -67,6 +67,11 @@ curl -X 'POST' \
   -H 'Content-Type: application/json' \
   -d '{
   "X_test": [
-    [1,2,3]
+    [
+      1,2,3,
+    ],
+    [
+      3,4,5,
+    ]
   ]}'
 ```
