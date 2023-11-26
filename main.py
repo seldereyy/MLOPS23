@@ -65,7 +65,7 @@ def train_model(filename: str, model_type: str, TrainPool: TrainData):
         model.dump(filename)
         return "Success! Model was dumped"
     except Exception as e:
-        raise HTTPException(status_code=404, detail=f"{e}")
+        raise HTTPException(status_code=400, detail=f"{e}")
     
 
 @app.post("/get_preds", status_code=200)
