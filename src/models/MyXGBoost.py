@@ -1,4 +1,4 @@
-from BasicWrapper import WrapModel
+from .BasicWrapper import WrapModel
 from xgboost import XGBClassifier
 
 

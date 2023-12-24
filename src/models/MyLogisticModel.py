@@ -1,5 +1,5 @@
 import numpy as np
-from BasicWrapper import WrapModel
+from .BasicWrapper import WrapModel
 from sklearn.linear_model import LogisticRegression as LR
 
 
