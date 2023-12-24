@@ -1,6 +1,15 @@
 version: '3'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myservice
+    ports:
+      - 127.0.0.1:5000:5000
+    working_dir: /code
+
   minio:
     image: minio/minio
     container_name: minio_s3

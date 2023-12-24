@@ -1,47 +1,30 @@
 import os
 import json
-
+import numpy as np
 import pandas as pd
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, File, UploadFile
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException, UploadFile
 
-# from src.pickle_utils import load_yaml, pickle_load
-# from src.minio_utils import put_model
 from src.save_load import MINIO_DVC
 
 from src.models import  MyLogisticModel
 from src.models  import MyXGBoost  
 
+MINIO_DVC=MINIO_DVC()
+app = FastAPI()
+model_types = MyLogisticModel.MyLogisticRegression().list_models()
 map_types_models = {
     "MyLogisticRegression": MyLogisticModel.MyLogisticRegression,
     "MyXGBoost": MyXGBoost.MyXGBoost,
 }
-
-config = load_yaml("src/cnf.yml")
-
-app = FastAPI()
-
-class TrainData(BaseModel):
-    # X_train: list[list]
-    # y_train: list
-    params: dict = {}
-
-
-# class TestData(BaseModel):
-#     X_test: list[list]
-
-# @app.post("/uploadfile/")
-# async def create_upload_file(file: UploadFile):
-#     return {"filename": file.filename}
 
 @app.get("/list_models", status_code=200)
 def list_available_models():
     """
     Метод, который возвращает список доступных для обучения моделей
     """
-    return config["available_models"]
+    return model_types
 
 @app.post("/train_model", status_code=201)
 def train_model(filename: str, model_type: str, X_train: UploadFile, y_train: UploadFile):#, TrainPool: TrainData):
@@ -54,27 +37,27 @@ def train_model(filename: str, model_type: str, X_train: UploadFile, y_train: Up
     return: Success в случае успеха, пишет пикл модели
     """
     X_train= pd.DataFrame(json.load(X_train.file))
+    X_train.index= range(len(X_train))
+    # X_train=[]
+    # for feat in X_train_.values():
+    #     X_train.append(feat)
     y_train= pd.DataFrame(json.load(y_train.file))
+    # return X_train[:10]
 
-    if not model_type in config["available_models"]:
+    if not model_type in model_types:
         "Тест на адекватность запроса"
-        
         raise HTTPException(status_code=404, detail="Такой тип модели я не прописывала") 
 
-    if filename[-4:] != ".pkl":
-        filename += ".pkl"
-
-    if os.path.exists(os.path.join(config["path_to_models"], filename)):
+    if MINIO_DVC.check_exists(model_name=filename, bucket_name="models"):
         "Переобучим модель, если она уже была обучена"
         MINIO_DVC.delete_model(filename)
         # delete_model(filename)
 
     try:
-        model = map_types_models[model_type](**{})#TrainPool.params)
-        print("Fit model...")
+        model = map_types_models[model_type](**{})
         model.fit(X_train, y_train)
-        # model.dump(filename)
-        return put_model(model, filename, model_type, {})
+        MINIO_DVC.save_model(filename, model)
+        return 'Success!'
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"{e}")
@@ -86,12 +69,7 @@ def model_predict(filename: str, X_test: UploadFile,):
     Получаем предсказания модели в виде листа 
     """
     X_test= pd.DataFrame(json.load(X_test.file))
-    path = os.path.join(config["path_to_models"], filename)
-    if path[-4:]!='.pkl':
-        path+='.pkl'
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="Такая модель не была обучена")
-    model = pickle_load(path)
+    model=MINIO_DVC.load_model(filename)
 
     return model.predict(X_test).tolist()
 
@@ -103,16 +81,11 @@ def delete_model(filename: str):
 
     return: информация об успешном удалении файла
     """
-    if filename[-4:] != ".pkl":
-        filename += ".pkl"
-    path = os.path.join(config["path_to_models"], filename)
-
-    if os.path.exists(path):
-        os.remove(path)
+    if MINIO_DVC.check_exists(model_name=filename, bucket_name="models"):
+        MINIO_DVC.delete_model(filename)
         return f'File {filename} was removed'
     else:
         raise HTTPException(status_code=404, detail="Такая модель не была обучена")
-
 
 def start():
     """
