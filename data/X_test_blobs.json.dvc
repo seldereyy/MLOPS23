@@ -1,0 +1,5 @@
+outs:
+- md5: b0f34ed65e67c2e7d97caf498eb62b6d
+  size: 325435
+  hash: md5
+  path: X_test_blobs.json

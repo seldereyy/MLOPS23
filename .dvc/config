@@ -1,0 +1,5 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = s3://models
+    endpointurl = http://172.19.0.2:9001
