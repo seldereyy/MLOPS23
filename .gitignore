@@ -1,2 +1,3 @@
-/models_data
-/data
+models_data/
+__pycache__/
+minio/
